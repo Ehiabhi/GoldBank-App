@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Redirect } from "react-router-dom";
+import { updateClientData } from "../redux/actions/actions";
 
-function Login() {
+function Login({ dispatch }) {
   const [loginFormData, setLoginFormData] = useState({
     accountNumber: "",
     password: "",
@@ -9,25 +10,25 @@ function Login() {
 
   const [goToDashboard, setGoToDashboard] = useState(false);
 
-  const logIn = (e) => {
+  const logIn = async (e) => {
     e.preventDefault();
-    fetch("/login", {
+    const response = await fetch("/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
       body: JSON.stringify(loginFormData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log(response.json(response));
-          setGoToDashboard(true);
-        }
-      })
-      .catch((err) => {
-        console.log("An error occured " + err);
-      });
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setGoToDashboard(true);
+      dispatch(updateClientData(data));
+    } else {
+      const message = response.text;
+      console.log("An error occured " + response.text);
+      throw new Error(message);
+    }
   };
 
   const handleInputChange = (e) => {

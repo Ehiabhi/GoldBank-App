@@ -1,0 +1,2 @@
+export const GET_CLIENT_INFO = "GET_CLIENT_INFO";
+export const SET_SENDER_INFO = "SET_SENDER_INFO";
