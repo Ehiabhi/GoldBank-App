@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const dateFormat = require("dateformat");
+const dateformat = require("dateformat");
 
 const app = express();
 
@@ -39,6 +39,18 @@ const accountSchema = new mongoose.Schema({
   accountBalance: {
     type: Number,
   },
+  lastLoggedIn: [
+    {
+      type: Date,
+      require: false,
+    },
+  ],
+  transactionHistory: [
+    {
+      type: Object,
+      require: false,
+    },
+  ],
 });
 
 const accountHolder = mongoose.model("accountHolder", accountSchema);
@@ -83,6 +95,7 @@ app.post("/signup", (req, res) => {
                 gender: userFormDetail.gender,
                 password: userFormDetail.password,
                 accountBalance: 5000,
+                lastLoggedIn: null,
               });
 
               newAccountHolder.save((err) => {
@@ -120,14 +133,80 @@ app.post("/login", (req, res) => {
         if (foundUser.password === userFormDetail.password) {
           console.log("Login Successfully");
           return res.status(200).json(foundUser);
+          // foundUser.lastLoggedIn = dateformat(
+          //   new Date(),
+          //   "dd/mmm/yyyy HH:MM:ss"
+          // );
+          // foundUser.save((err) => {
+          //   if (err) {
+          //     console.log("Error while saving user's info to database " + err);
+          //   }
+          //   console.log("Login Successfully");
+          //   return res.status(200).json(foundUser);
+          // });
         }
       }
     }
   );
 });
 
-app.get("/", (req, res) => {
-  //
+app.post("/transfer", (req, res) => {
+  const transferInfo = req.body;
+  const receipient = transferInfo.receipient;
+  accountHolder.findById(transferInfo.senderId, {}, {}, (err, sender) => {
+    if (err) {
+      console.log("Error while searching database for sender info. " + err);
+    }
+    if (!sender) {
+      console.log(
+        "Ridiculously, sender does not exist or sender information could not be retrieved. Please try again later or contact your bank's customer care center."
+      );
+    } else {
+      sender.accountBalance -= receipient.amount;
+      sender.save((err) => {
+        if (err) {
+          console.log("Error while saving user's info to database " + err);
+        }
+        console.log("Transfer successful for sender.");
+        accountHolder.findOne(
+          { accountNumber: receipient.benAcctNum },
+          {},
+          {},
+          (err, receiver) => {
+            if (err) {
+              console.log(
+                "Error while searching database for recipient info. " + err
+              );
+            }
+            if (!receiver) {
+              console.log("No such user exist.");
+              sender.accountBalance += Number(receipient.amount);
+              sender.save((err) => {
+                if (err) {
+                  console.log(
+                    "Error while saving sender info after withdraw reversal. " +
+                      err
+                  );
+                  return res.status(404).json();
+                }
+              });
+            } else {
+              receiver.accountBalance += Number(receipient.amount);
+              receiver.save((err) => {
+                if (err) {
+                  console.log(
+                    "Error while saving receipient's info to database " + err
+                  );
+                }
+                console.log("Transfer successful for receipient.");
+                return res.status(200).json(sender);
+              });
+            }
+          }
+        );
+      });
+    }
+  });
 });
 
 app.post("/", (req, res) => {
