@@ -49,6 +49,7 @@ function Login({ dispatch }) {
           <input
             type="number"
             name="accountNumber"
+            min="0"
             className="form-control"
             placeholder="Account/Phone Number"
             value={loginFormData.fullName}

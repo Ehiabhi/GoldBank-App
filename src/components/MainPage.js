@@ -11,10 +11,17 @@ import {
   Redirect,
 } from "react-router-dom";
 import { connect } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function MainPage({ dispatch, loggedInClient }) {
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={true}
+      />
       <Router>
         <Switch>
           <Route

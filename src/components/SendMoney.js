@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { updateClientData } from "../redux/actions/actions";
 import { Redirect } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 export default function SendMoney({ senderInfo, dispatch }) {
   const [transferFormData, setTransferFormData] = useState({
@@ -20,7 +19,6 @@ export default function SendMoney({ senderInfo, dispatch }) {
       return { ...prevState, [name]: value };
     });
   };
-  const notify = (mess) => toast.success(mess);
 
   const TransferMoney = async (e) => {
     e.preventDefault();
@@ -43,14 +41,10 @@ export default function SendMoney({ senderInfo, dispatch }) {
     });
 
     if (response.ok) {
-      notify("Transfer successful");
-      console.log("Transfer Successful");
+      toast.success("Transfer Successful");
       const info = await response.clone().json(); //Since response.json() can only be consumed once, we use response.clone().json() to make consumption persistent.
-      setTimeout(() => {
-        setGoToDashboard(true);
-      }, 3000);
-      console.log(info);
-      return dispatch(updateClientData(info));
+      setGoToDashboard(true);
+      dispatch(updateClientData(info));
     } else {
       const message = response.text;
       return new Error(message);
@@ -60,11 +54,6 @@ export default function SendMoney({ senderInfo, dispatch }) {
   return (
     <>
       {goToDashboard && <Redirect to="/accoutDashBoard" />}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={true}
-      />
       <h1>Gold Bank</h1>
       <h2>Transfer Funds</h2>
       <form>
