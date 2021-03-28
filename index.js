@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const dateformat = require("dateformat");
 
 const app = express();
 
@@ -151,6 +150,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/transfer", (req, res) => {
+  const transactionDate = new Date();
   const transferInfo = req.body;
   const receipient = transferInfo.receipient;
   accountHolder.findById(transferInfo.senderId, {}, {}, (err, sender) => {
@@ -162,7 +162,16 @@ app.post("/transfer", (req, res) => {
         "Ridiculously, sender does not exist or sender information could not be retrieved. Please try again later or contact your bank's customer care center."
       );
     } else {
-      sender.accountBalance -= receipient.amount;
+      if ("0" + sender.accountNumber !== receipient.benAcctNum) {
+        sender.accountBalance -= receipient.amount;
+      }
+      sender.transactionHistory.push({
+        Date: "Transaction date: " + transactionDate,
+        Type: "Transaction type: Dr",
+        AcctNum: "AccountNumber: " + sender.accountNumber,
+        Amount: "Amount: #" + receipient.amount,
+        Narration: "Narration: " + receipient.narration,
+      });
       sender.save((err) => {
         if (err) {
           console.log("Error while saving user's info to database " + err);
@@ -192,6 +201,13 @@ app.post("/transfer", (req, res) => {
               });
             } else {
               receiver.accountBalance += Number(receipient.amount);
+              receiver.transactionHistory.push({
+                Date: "Transaction date: " + transactionDate,
+                Type: "Transaction type: Cr",
+                AcctNum: "AccountNumber: " + receiver.accountNumber,
+                Amount: "Amount: #" + receipient.amount,
+                Narration: "Narration: " + receipient.narration,
+              });
               receiver.save((err) => {
                 if (err) {
                   console.log(
@@ -199,7 +215,11 @@ app.post("/transfer", (req, res) => {
                   );
                 }
                 console.log("Transfer successful for receipient.");
-                return res.status(200).json(sender);
+                if ("0" + sender.accountNumber !== receipient.benAcctNum) {
+                  return res.status(200).json(sender);
+                } else {
+                  return res.status(200).json(receiver);
+                }
               });
             }
           }
@@ -209,7 +229,7 @@ app.post("/transfer", (req, res) => {
   });
 });
 
-app.post("/", (req, res) => {
+app.post("/viewStatement", (req, res) => {
   //
 });
 
