@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import loggedInClient from "./reducers";
+import loggedInClient from "./clientreducers";
 
 const rootReducer = combineReducers({
   loggedInClient,

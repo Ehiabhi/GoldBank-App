@@ -1,34 +1,26 @@
 import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
-import { updateClientData } from "../redux/actions/actions";
+import { withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function Login({ dispatch }) {
+function Login({ login, history }) {
   const [loginFormData, setLoginFormData] = useState({
     accountNumber: "",
     password: "",
   });
 
-  const [goToDashboard, setGoToDashboard] = useState(false);
-
   const logIn = async (e) => {
     e.preventDefault();
-    const response = await fetch("/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(loginFormData),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setGoToDashboard(true);
-      dispatch(updateClientData(data));
-    } else {
-      const message = response.text;
-      console.log("An error occured " + response.text);
-      throw new Error(message);
-    }
+    login(loginFormData)
+      .then((status) => {
+        if (status.success) {
+          history.push("/accoutDashBoard");
+        }
+      })
+      .catch((err) => {
+        let mes = new Error();
+        mes.message = err.text;
+        alert(err);
+      });
   };
 
   const handleInputChange = (e) => {
@@ -41,8 +33,7 @@ function Login({ dispatch }) {
 
   return (
     <>
-      {goToDashboard && <Redirect to="/accoutDashBoard" />}
-      <h1>Welcome</h1>
+      <h1>Welcome To Gold Bank.</h1>
       <h2>Kindly input your login details to sign in</h2>
       <form onSubmit={logIn}>
         <div className="form-group">
@@ -68,12 +59,17 @@ function Login({ dispatch }) {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">
-          Login
-        </button>
+        <div className="action-items">
+          <button type="submit" className="btn btn-primary">
+            Login
+          </button>
+          <Link className="btn btn-outline-primary" to={"/signup"}>
+            Sign Up
+          </Link>
+        </div>
       </form>
     </>
   );
 }
 
-export default Login;
+export default withRouter(Login);

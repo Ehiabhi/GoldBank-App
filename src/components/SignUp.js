@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 
-export default function SignUp() {
+export default function SignUp({ signup }) {
   const [signupFormData, setSignupFormData] = useState({
     fullName: "",
     contact: "",
@@ -17,21 +17,14 @@ export default function SignUp() {
       alert("Passwords do not match");
       return false;
     }
-    fetch("/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(signupFormData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          setGoToLogin(true);
-        }
+    signup(signupFormData)
+      .then((status) => {
+        setGoToLogin(status);
       })
       .catch((err) => {
-        console.log("An error occured " + err);
+        let mes = new Error();
+        mes.message = err.text;
+        alert(err);
       });
   };
 
@@ -108,9 +101,14 @@ export default function SignUp() {
             onChange={handleInputChange}
           />
         </div>
-        <button type="submit" className="btn btn-primary">
-          Sign Up
-        </button>
+        <div className="action-items">
+          <button type="submit" className="btn btn-primary">
+            Sign Up
+          </button>
+          <Link className="btn btn-outline-primary" to={"/login"}>
+            Login
+          </Link>
+        </div>
       </form>
     </>
   );

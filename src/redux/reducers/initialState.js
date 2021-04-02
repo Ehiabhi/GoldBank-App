@@ -1,4 +1,4 @@
-const initialState = {
+export const initialClientState = {
   accountBalance: null,
   accountNumber: null,
   fullName: null,
@@ -7,5 +7,3 @@ const initialState = {
   _id: null,
   transactionHistory: [],
 };
-
-export default initialState;

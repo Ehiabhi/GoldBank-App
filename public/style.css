@@ -11,3 +11,8 @@
     border: none;
     padding: 0;
 }
+
+.action-items {
+    display: flex;
+    justify-content: space-between;
+}

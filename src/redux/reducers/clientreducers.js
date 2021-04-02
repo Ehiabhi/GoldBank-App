@@ -1,9 +1,9 @@
 import * as actionTypes from "../actionTypes";
-import initialState from "./initialState";
+import { initialClientState } from "./initialState";
 
 export default function updateClientDataReducer(
   state = {
-    clientData: initialState,
+    clientData: initialClientState,
   },
   action
 ) {

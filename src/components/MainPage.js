@@ -1,7 +1,6 @@
 import React from "react";
 import Login from "./Login";
 import Signup from "./SignUp";
-import Home from "./Home";
 import Dashboard from "./AccountDashboard";
 import SendMoney from "./SendMoney";
 import {
@@ -13,8 +12,13 @@ import {
 import { connect } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  postLogin,
+  postTransferMoney,
+  postSignUp,
+} from "../redux/actions/actions";
 
-function MainPage({ dispatch, loggedInClient }) {
+function MainPage({ login, sendMoney, loggedInClient, signup }) {
   return (
     <>
       <ToastContainer
@@ -24,16 +28,13 @@ function MainPage({ dispatch, loggedInClient }) {
       />
       <Router>
         <Switch>
-          <Route
-            path="/login"
-            component={() => <Login dispatch={dispatch} />}
-          />
-          <Route path="/signup" component={Signup} />
+          <Route path="/login" component={() => <Login login={login} />} />
+          <Route path="/signup" component={() => <Signup signup={signup} />} />
           <Route
             path="/sendMoney"
             component={() => (
               <SendMoney
-                dispatch={dispatch}
+                sendMoney={sendMoney}
                 senderInfo={loggedInClient.clientData}
               />
             )}
@@ -44,7 +45,7 @@ function MainPage({ dispatch, loggedInClient }) {
             exact
             component={() => <Dashboard info={loggedInClient.clientData} />}
           />
-          <Route path="/" exact component={Home} />
+          <Route path="/" exact component={() => <Login login={login} />} />
           <Redirect to="/" />
         </Switch>
       </Router>
@@ -52,10 +53,16 @@ function MainPage({ dispatch, loggedInClient }) {
   );
 }
 
+const mapDispatchToProps = (dispatch) => ({
+  login: (data) => dispatch(postLogin(data)),
+  sendMoney: (info) => dispatch(postTransferMoney(info)),
+  signup: (data) => dispatch(postSignUp(data)),
+});
+
 function mapStateToProps(state) {
   return {
     loggedInClient: state.loggedInClient,
   };
 }
 
-export default connect(mapStateToProps)(MainPage);
+export default connect(mapStateToProps, mapDispatchToProps)(MainPage);

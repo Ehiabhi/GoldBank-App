@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { updateClientData } from "../redux/actions/actions";
 import { Redirect } from "react-router-dom";
 import { toast } from "react-toastify";
 
-export default function SendMoney({ senderInfo, dispatch }) {
+export default function SendMoney({ senderInfo, sendMoney }) {
   const [transferFormData, setTransferFormData] = useState({
     benAcctNum: "",
     benFullName: "",
@@ -20,7 +19,7 @@ export default function SendMoney({ senderInfo, dispatch }) {
     });
   };
 
-  const TransferMoney = async (e) => {
+  const TransferMoney = (e) => {
     e.preventDefault();
     if (senderInfo.accountBalance < transferFormData.amount) {
       alert("Insufficient funds");
@@ -30,24 +29,10 @@ export default function SendMoney({ senderInfo, dispatch }) {
       senderId: senderInfo._id,
       receipient: { ...transferFormData },
     };
-
-    const response = await fetch("/transfer", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(dataToSend),
-    });
-
-    if (response.ok) {
+    const status = sendMoney(dataToSend);
+    if (status) {
       toast.success("Transfer Successful");
-      const info = await response.clone().json(); //Since response.json() can only be consumed once, we use response.clone().json() to make consumption persistent.
       setGoToDashboard(true);
-      dispatch(updateClientData(info));
-    } else {
-      const message = response.text;
-      return new Error(message);
     }
   };
 
