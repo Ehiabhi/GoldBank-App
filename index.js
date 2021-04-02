@@ -2,16 +2,30 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost/goldBank", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// mongoose.connect("mongodb://localhost/goldBank", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+mongoose.connect(
+  "mongodb+srv://admin-ehis:" +
+    process.env.PASSWORD +
+    "@cluster0.5p0bt.mongodb.net/goldBank",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
+mongoose.set("useFindAndModify", false);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function () {
@@ -50,6 +64,10 @@ const accountSchema = new mongoose.Schema({
       require: false,
     },
   ],
+  authToken: {
+    type: String,
+    required: false,
+  },
 });
 
 const accountHolder = mongoose.model("accountHolder", accountSchema);
@@ -69,6 +87,8 @@ app.post("/signup", (req, res) => {
         console.log(
           "User with the same full name exist. Kindly choose another and try agian."
         );
+        res.statusMessage =
+          "User with the same full name exist. Kindly choose another and try agian.";
         return res.status(420).json();
       } else {
         // Check for existing phone number.
@@ -88,24 +108,34 @@ app.post("/signup", (req, res) => {
               );
               return res.status(420).json();
             } else {
-              const newAccountHolder = new accountHolder({
-                fullName: userFormDetail.fullName,
-                accountNumber: userFormDetail.contact,
-                gender: userFormDetail.gender,
-                password: userFormDetail.password,
-                accountBalance: 5000,
-                lastLoggedIn: null,
-              });
+              bcrypt.hash(
+                userFormDetail.password,
+                saltRounds,
+                function (err, hash) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  const newAccountHolder = new accountHolder({
+                    fullName: userFormDetail.fullName,
+                    accountNumber: userFormDetail.contact,
+                    gender: userFormDetail.gender,
+                    password: hash,
+                    accountBalance: 5000,
+                    lastLoggedIn: null,
+                    authToken: null,
+                  });
 
-              newAccountHolder.save((err) => {
-                if (err) {
-                  console.log(
-                    "Error while saving user's info to database " + err
-                  );
+                  newAccountHolder.save((err) => {
+                    if (err) {
+                      console.log(
+                        "Error while saving user's info to database " + err
+                      );
+                    }
+                    console.log("User saved successfully");
+                    return res.status(200).json();
+                  });
                 }
-                console.log("User saved successfully");
-                return res.status(200).json();
-              });
+              );
             }
           }
         );
@@ -128,22 +158,38 @@ app.post("/login", (req, res) => {
         console.log(
           "User with the account number does not exist. Kindly check and try again."
         );
+        res.statusMessage =
+          "User with the account number does not exist. Kindly check and try again.";
+        return res.status(402).json();
       } else {
-        if (foundUser.password === userFormDetail.password) {
-          console.log("Login Successfully");
-          return res.status(200).json(foundUser);
-          // foundUser.lastLoggedIn = dateformat(
-          //   new Date(),
-          //   "dd/mmm/yyyy HH:MM:ss"
-          // );
-          // foundUser.save((err) => {
-          //   if (err) {
-          //     console.log("Error while saving user's info to database " + err);
-          //   }
-          //   console.log("Login Successfully");
-          //   return res.status(200).json(foundUser);
-          // });
-        }
+        bcrypt.compare(
+          userFormDetail.password,
+          foundUser.password,
+          function (err, result) {
+            if (err) {
+              console.log(err);
+            }
+            if (result) {
+              generateAuthToken(foundUser).then((genToken) => {
+                foundUser.authToken = genToken;
+              });
+              foundUser.save((err) => {
+                if (err) {
+                  console.log(
+                    "Error while saving user's token to database " + err
+                  );
+                }
+                console.log("User token saved successfully");
+                foundUser.password = undefined;
+                console.log("Login Successfully");
+                return res.status(200).json(foundUser);
+              });
+            } else {
+              console.log("Incorrect login details.");
+              throw new Error();
+            }
+          }
+        );
       }
     }
   );
@@ -216,8 +262,10 @@ app.post("/transfer", (req, res) => {
                 }
                 console.log("Transfer successful for receipient.");
                 if ("0" + sender.accountNumber !== receipient.benAcctNum) {
+                  sender.password = undefined;
                   return res.status(200).json(sender);
                 } else {
+                  receiver.password = undefined;
                   return res.status(200).json(receiver);
                 }
               });
@@ -229,9 +277,35 @@ app.post("/transfer", (req, res) => {
   });
 });
 
-app.post("/viewStatement", (req, res) => {
-  //
-});
+const generateAuthToken = async (user) => {
+  const { accountNumber, password } = user;
+  const secret = process.env.AUTH_SECRET;
+  const token = await jwt.sign({ accountNumber, password }, secret);
+  return token;
+};
+
+const authMiddleware = async function (req, res, next) {
+  try {
+    const token = req.header("Authorization").split(" ")[1];
+    const decoded = jwt.verify(token, process.env.secret);
+    const result = await pool.query(
+      "select b.userid,b.first_name,b.last_name,b.email,t.access_token from bank_user b inner join tokens t on b.userid=t.userid where t.access_token=$1 and t.userid=$2",
+      [token, decoded.userid]
+    );
+    const user = result.rows[0];
+    if (user) {
+      req.user = user;
+      req.token = token;
+      next();
+    } else {
+      throw new Error("Error while authentication");
+    }
+  } catch (error) {
+    res.status(400).send({
+      auth_error: "Authentication failed.",
+    });
+  }
+};
 
 let port = process.env.PORT || 3001;
 app.listen(port, () => console.log("Server started at port " + port));
