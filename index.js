@@ -5,8 +5,13 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+let path = require("path");
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, "./build")));
+
+console.log(__dirname, "./build");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -306,6 +311,10 @@ const authMiddleware = async function (req, res, next) {
     });
   }
 };
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "./build/index.html"));
+});
 
 let port = process.env.PORT || 3001;
 app.listen(port, () => console.log("Server started at port " + port));

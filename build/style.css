@@ -1,0 +1,18 @@
+#navLink {
+    display: block;
+    width: 30%;
+}
+
+.transactionContainer {
+    padding: 2px;
+}
+
+.transactionList>li {
+    border: none;
+    padding: 0;
+}
+
+.action-items {
+    display: flex;
+    justify-content: space-between;
+}
