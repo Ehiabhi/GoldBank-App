@@ -280,8 +280,24 @@ app.post("/transfer", (req, res) => {
   });
 });
 
+app.get("/viewRegisteredUsers", (req, res) => {
+  accountHolder.find({}, {}, {}, (err, userList) => {
+    if (err) {
+      console.log("Error while fetching list of users. " + err);
+    }
+    if (userList) {
+      const userAcctNumList = userList.map((user) => {
+        return { accountNumber: user.accountNumber, name: user.fullName };
+      });
+      res.status(200).json(userAcctNumList);
+    } else {
+      console.log("No users found");
+      return res.status(402).json();
+    }
+  });
+});
+
 const generateAuthToken = async (user) => {
-  console.log(user);
   const { accountNumber, password } = user;
   const secret = process.env.AUTH_SECRET;
   const token = await jwt.sign(
