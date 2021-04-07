@@ -14,20 +14,20 @@ app.use(express.static(path.join(__dirname, "./build")));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost/goldBank", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// mongoose.connect("mongodb://localhost/goldBank", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
 
-// mongoose.connect(
-//   "mongodb+srv://admin-ehis:" +
-//     process.env.PASSWORD +
-//     "@cluster0.5p0bt.mongodb.net/goldBank",
-//   {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   }
-// );
+mongoose.connect(
+  "mongodb+srv://admin-ehis:" +
+    process.env.PASSWORD +
+    "@cluster0.5p0bt.mongodb.net/goldBank",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 mongoose.set("useFindAndModify", false);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
