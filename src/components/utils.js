@@ -1,3 +1,8 @@
+// import jwt_decode from "jwt-decode";
+import { history } from "./MainPage";
+import { initiateGetProfile } from "../redux/actions/actions";
+import { store } from "../index";
+
 export function greeting() {
   const currentHour = new Date().getHours();
   if (currentHour < 12 || currentHour === 0) {
@@ -9,24 +14,22 @@ export function greeting() {
   }
 }
 
-// export const maintainSession = () => {
-//   const user_token = localStorage.getItem("user_token");
-//   if (user_token) {
-//     const decoded = jwt_decode(user_token);
-//     updateStore(decoded);
-//   } else {
-//     history.pushState("/");
-//   }
-// };
+export const maintainSession = () => {
+  const user_token = localStorage.getItem("user_token");
+  const currentPath = window.location.pathname;
+  if (user_token) {
+    store.dispatch(initiateGetProfile());
+    if (currentPath !== "/accoutDashBoard" && currentPath !== "/sendMoney") {
+      history.push("/");
+    } else {
+      history.push(currentPath);
+    }
+  } else {
+    history.push("/");
+  }
+};
 
-// export const updateStore = (user) => {
-//   const { acctNum, password } = user;
-//   store.dispatch(
-//     signIn({
-//       acctNum,
-//       password,
-//       token: localStorage.getItem("user_token"),
-//     })
-//   );
-//   store.dispatch(initiateGetProfile(acctNum));
-// };
+export const setAuthHeader = () => {
+  const token = localStorage.getItem("user_token");
+  return token;
+};

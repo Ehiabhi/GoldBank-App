@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { greeting } from "./utils";
-import { Redirect } from "react-router-dom";
+import { Redirect, withRouter } from "react-router-dom";
 import dateformat from "dateformat";
 
-export default function Dashboard({ info }) {
+function Dashboard({ info, history, logout }) {
   const [customerInfo, setCustomerInfo] = useState({
     accountBalance: null,
     accountNumber: null,
@@ -20,6 +20,11 @@ export default function Dashboard({ info }) {
 
   const handleSendMoney = () => {
     setRouteToSendMoney(true);
+  };
+
+  const handleLogOut = () => {
+    logout();
+    history.push("/");
   };
 
   const fetchDebitTransaction = () => {
@@ -187,6 +192,10 @@ export default function Dashboard({ info }) {
       <button className="btn btn-primary" onClick={fetchCreditTransaction}>
         View All Credit Transaction
       </button>
+      &nbsp;
+      <button className="btn btn-danger" onClick={handleLogOut}>
+        Log out
+      </button>
       <br />
       <br />
       <div id="transactHistory"></div>
@@ -198,3 +207,5 @@ export default function Dashboard({ info }) {
     </>
   );
 }
+
+export default withRouter(Dashboard);

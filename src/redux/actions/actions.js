@@ -1,4 +1,6 @@
 import * as actionTypes from "../actionTypes";
+import { setAuthHeader } from "../../components/utils";
+import { initialClientState } from "../reducers/initialState";
 
 export function updateClientData(data) {
   return { type: actionTypes.GET_CLIENT_INFO, payload: data };
@@ -24,6 +26,7 @@ export const postLogin = (formData) => (dispatch) => {
     })
     .then((response) => response.json())
     .then((res) => {
+      localStorage.setItem("user_token", res.authToken);
       dispatch(updateClientData(res));
       return { success: true };
     })
@@ -88,4 +91,55 @@ export const postSignUp = (formData) => (dispatch) => {
       var errmess = new Error(err.message);
       throw errmess;
     });
+};
+
+export const postLogout = () => (dispatch) => {
+  return fetch("/logout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: "Bearer " + setAuthHeader(),
+    },
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response;
+      } else {
+        console.log("An error occured " + response.text);
+        let error = new Error("Error: " + response.statusText);
+        throw error;
+      }
+    })
+    .then((response) => response.json())
+    .then((res) => {
+      localStorage.removeItem("user_token");
+      dispatch(updateClientData(initialClientState));
+      return { success: true };
+    })
+    .catch((error) => {
+      var errmess = new Error(error.message);
+      alert(errmess);
+      return { success: false };
+    });
+};
+
+export const initiateGetProfile = () => {
+  return async (dispatch) => {
+    try {
+      const response = await fetch("/getProfile", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + setAuthHeader(),
+        },
+      });
+      const profile = await response.json();
+      dispatch(updateClientData(profile));
+    } catch (error) {
+      var errmess = new Error(error.message);
+      alert(errmess);
+    }
+  };
 };

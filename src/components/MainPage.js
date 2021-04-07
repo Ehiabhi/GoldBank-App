@@ -14,11 +14,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   postLogin,
+  postLogout,
   postTransferMoney,
   postSignUp,
 } from "../redux/actions/actions";
+import { createBrowserHistory } from "history";
 
-function MainPage({ login, sendMoney, loggedInClient, signup }) {
+export const history = createBrowserHistory();
+
+function MainPage({ login, sendMoney, loggedInClient, signup, logout }) {
   return (
     <>
       <ToastContainer
@@ -43,7 +47,9 @@ function MainPage({ login, sendMoney, loggedInClient, signup }) {
           <Route
             path="/accoutDashBoard"
             exact
-            component={() => <Dashboard info={loggedInClient.clientData} />}
+            component={() => (
+              <Dashboard info={loggedInClient.clientData} logout={logout} />
+            )}
           />
           <Route path="/" exact component={() => <Login login={login} />} />
           <Redirect to="/" />
@@ -57,6 +63,7 @@ const mapDispatchToProps = (dispatch) => ({
   login: (data) => dispatch(postLogin(data)),
   sendMoney: (info) => dispatch(postTransferMoney(info)),
   signup: (data) => dispatch(postSignUp(data)),
+  logout: () => dispatch(postLogout()),
 });
 
 function mapStateToProps(state) {
