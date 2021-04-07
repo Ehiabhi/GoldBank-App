@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { greeting } from "./utils";
 import { Redirect, withRouter } from "react-router-dom";
 import dateformat from "dateformat";
+import { toast } from "react-toastify";
 
 function Dashboard({ info, history, logout }) {
   const [customerInfo, setCustomerInfo] = useState({
@@ -25,6 +26,7 @@ function Dashboard({ info, history, logout }) {
   const handleLogOut = () => {
     logout();
     history.push("/");
+    toast.success("You've been logged out successfully.");
   };
 
   const fetchDebitTransaction = () => {

@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import { toast } from "react-toastify";
 
-export default function SendMoney({ senderInfo, sendMoney }) {
+export default function SendMoney({
+  senderInfo,
+  sendMoney,
+  viewUsersList,
+  usersList,
+}) {
   const [transferFormData, setTransferFormData] = useState({
     benAcctNum: "",
     benFullName: "",
@@ -10,6 +15,27 @@ export default function SendMoney({ senderInfo, sendMoney }) {
     narration: "",
   });
   const [goToDashboard, setGoToDashboard] = useState(false);
+
+  useEffect(() => {
+    const list = document.getElementById("usersList");
+    list.style.display = "none";
+    if (list.innerHTML !== "") {
+      list.style.display = "block";
+      return false;
+    }
+    if (usersList.length !== 0) {
+      usersList.forEach((entry, index) => {
+        list.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
+            <ul class="list-group transactionList">
+              <li class="list-group-item">Name: ${entry.name}</li>
+              <li class="list-group-item">AccountNumber: ${entry.accountNumber}</li>
+            </ul>
+          </div>
+          `;
+      });
+    }
+    list.style.display = "block";
+  });
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -21,6 +47,12 @@ export default function SendMoney({ senderInfo, sendMoney }) {
 
   const TransferMoney = (e) => {
     e.preventDefault();
+    if (transferFormData.benAcctNum === "" || transferFormData.amount === "") {
+      toast.error("Beneficiary name and amount cannot be empty.", {
+        autoClose: 6000,
+      });
+      return false;
+    }
     if (senderInfo.accountBalance < transferFormData.amount) {
       alert("Insufficient funds");
       return false;
@@ -34,6 +66,10 @@ export default function SendMoney({ senderInfo, sendMoney }) {
       toast.success("Transfer Successful");
       setGoToDashboard(true);
     }
+  };
+
+  const viewList = () => {
+    viewUsersList();
   };
 
   return (
@@ -78,10 +114,21 @@ export default function SendMoney({ senderInfo, sendMoney }) {
             onChange={handleInputChange}
           />
         </div>
-        <button className="btn btn-primary" onClick={TransferMoney}>
-          Transfer
-        </button>
+        <div className="action-items">
+          <button
+            className="btn btn-primary"
+            type="submit"
+            onClick={TransferMoney}
+          >
+            Transfer
+          </button>
+
+          <button className="btn btn-outline-primary" onClick={viewList}>
+            View List of Registered Users
+          </button>
+        </div>
       </form>
+      <div id="usersList"></div>
     </>
   );
 }

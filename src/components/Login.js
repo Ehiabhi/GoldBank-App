@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Login({ login, history }) {
   const [loginFormData, setLoginFormData] = useState({
@@ -14,6 +15,7 @@ function Login({ login, history }) {
       .then((status) => {
         if (status.success) {
           history.push("/accoutDashBoard");
+          toast.success("Login successful.");
         }
       })
       .catch((err) => {

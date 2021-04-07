@@ -6,6 +6,14 @@ export function updateClientData(data) {
   return { type: actionTypes.GET_CLIENT_INFO, payload: data };
 }
 
+export function updateClientList(data) {
+  return { type: actionTypes.GET_CLIENT_LIST, payload: data };
+}
+
+export function removeClientList() {
+  return { type: actionTypes.REMOVE_CLIENT_LIST };
+}
+
 export const postLogin = (formData) => (dispatch) => {
   return fetch("/login", {
     method: "POST",
@@ -61,6 +69,7 @@ export const postTransferMoney = (transferdata) => (dispatch) => {
     .then((response) => response.json())
     .then((data) => {
       dispatch(updateClientData(data));
+      dispatch(removeClientList());
       return true;
     })
     .catch((error) => {
@@ -137,6 +146,26 @@ export const initiateGetProfile = () => {
       });
       const profile = await response.json();
       dispatch(updateClientData(profile));
+    } catch (error) {
+      var errmess = new Error(error.message);
+      alert(errmess);
+    }
+  };
+};
+
+export const viewRegisteredUsers = () => {
+  return async (dispatch) => {
+    try {
+      const response = await fetch("/viewRegisteredUsers", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+      const usersList = await response.json();
+      dispatch(updateClientList(usersList));
+      return usersList;
     } catch (error) {
       var errmess = new Error(error.message);
       alert(errmess);

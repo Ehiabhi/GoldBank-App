@@ -17,12 +17,21 @@ import {
   postLogout,
   postTransferMoney,
   postSignUp,
+  viewRegisteredUsers,
 } from "../redux/actions/actions";
 import { createBrowserHistory } from "history";
 
 export const history = createBrowserHistory();
 
-function MainPage({ login, sendMoney, loggedInClient, signup, logout }) {
+function MainPage({
+  login,
+  sendMoney,
+  loggedInClient,
+  signup,
+  logout,
+  viewUserList,
+  usersList,
+}) {
   return (
     <>
       <ToastContainer
@@ -39,7 +48,9 @@ function MainPage({ login, sendMoney, loggedInClient, signup, logout }) {
             component={() => (
               <SendMoney
                 sendMoney={sendMoney}
+                viewUsersList={viewUserList}
                 senderInfo={loggedInClient.clientData}
+                usersList={usersList}
               />
             )}
           />
@@ -64,11 +75,13 @@ const mapDispatchToProps = (dispatch) => ({
   sendMoney: (info) => dispatch(postTransferMoney(info)),
   signup: (data) => dispatch(postSignUp(data)),
   logout: () => dispatch(postLogout()),
+  viewUserList: () => dispatch(viewRegisteredUsers()),
 });
 
 function mapStateToProps(state) {
   return {
     loggedInClient: state.loggedInClient,
+    usersList: state.updateClientListDataReducer,
   };
 }
 

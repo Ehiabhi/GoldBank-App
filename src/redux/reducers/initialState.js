@@ -7,3 +7,5 @@ export const initialClientState = {
   _id: null,
   transactionHistory: [],
 };
+
+export const initialClientList = [];
