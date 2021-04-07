@@ -11,25 +11,23 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, "./build")));
 
-console.log(__dirname, "./build");
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// mongoose.connect("mongodb://localhost/goldBank", {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
+mongoose.connect("mongodb://localhost/goldBank", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-mongoose.connect(
-  "mongodb+srv://admin-ehis:" +
-    process.env.PASSWORD +
-    "@cluster0.5p0bt.mongodb.net/goldBank",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+// mongoose.connect(
+//   "mongodb+srv://admin-ehis:" +
+//     process.env.PASSWORD +
+//     "@cluster0.5p0bt.mongodb.net/goldBank",
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   }
+// );
 mongoose.set("useFindAndModify", false);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -175,19 +173,19 @@ app.post("/login", (req, res) => {
               console.log(err);
             }
             if (result) {
-              generateAuthToken(foundUser).then((genToken) => {
-                foundUser.authToken = genToken;
-              });
-              foundUser.save((err) => {
-                if (err) {
-                  console.log(
-                    "Error while saving user's token to database " + err
-                  );
-                }
-                console.log("User token saved successfully");
-                foundUser.password = undefined;
-                console.log("Login Successfully");
-                return res.status(200).json(foundUser);
+              generateAuthToken(foundUser).then((token) => {
+                foundUser.authToken = token;
+                foundUser.save((err) => {
+                  if (err) {
+                    console.log(
+                      "Error while signing in... Try again later. " + err
+                    );
+                  }
+                  console.log("User token saved successfully");
+                  foundUser.password = undefined;
+                  console.log("Login Successfully");
+                  return res.status(200).json(foundUser);
+                });
               });
             } else {
               console.log("Incorrect login details.");
@@ -283,37 +281,86 @@ app.post("/transfer", (req, res) => {
 });
 
 const generateAuthToken = async (user) => {
+  console.log(user);
   const { accountNumber, password } = user;
   const secret = process.env.AUTH_SECRET;
-  const token = await jwt.sign({ accountNumber, password }, secret);
+  const token = await jwt.sign(
+    {
+      accountNumber,
+      password,
+    },
+    secret
+  );
   return token;
 };
 
 const authMiddleware = async function (req, res, next) {
   try {
     const token = req.header("Authorization").split(" ")[1];
-    const decoded = jwt.verify(token, process.env.secret);
-    const result = await pool.query(
-      "select b.userid,b.first_name,b.last_name,b.email,t.access_token from bank_user b inner join tokens t on b.userid=t.userid where t.access_token=$1 and t.userid=$2",
-      [token, decoded.userid]
+    const decoded = jwt.verify(token, process.env.AUTH_SECRET);
+    accountHolder.findOne(
+      { accountNumber: decoded.accountNumber, authToken: token },
+      function (err, user) {
+        if (err) {
+          console.log("Error while logging out user. " + err);
+        }
+        if (user) {
+          req.user = user;
+          req.token = token;
+          next();
+        } else {
+          throw new Error("Error while logging out user.");
+        }
+      }
     );
-    const user = result.rows[0];
-    if (user) {
-      req.user = user;
-      req.token = token;
-      next();
-    } else {
-      throw new Error("Error while authentication");
-    }
   } catch (error) {
-    res.status(400).send({
-      auth_error: "Authentication failed.",
-    });
+    throw new Error("Authentication failed." + error);
   }
 };
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "./build/index.html"));
+app.post("/logout", authMiddleware, async (req, res) => {
+  try {
+    const { accountNumber, authToken } = req.user;
+    accountHolder.findOne(
+      {
+        accountNumber: accountNumber,
+        authToken: authToken,
+      },
+      (err, foundUser) => {
+        if (err) {
+          console.log("Error while logging out user. " + err);
+        }
+        if (foundUser) {
+          foundUser.authToken = undefined;
+          foundUser.save((err) => {
+            if (err) {
+              console.log(
+                "Error while saving receipient's info during log out. " + err
+              );
+            }
+            return res.status(200).json(foundUser);
+          });
+        } else {
+          res.statusMessage = "User was never logged in.";
+          return res.status(402).json();
+        }
+      }
+    );
+  } catch (error) {
+    res.status(400).send({
+      logout_error: "Error while logging out..Try again later.",
+    });
+  }
+});
+
+app.get("/getProfile", authMiddleware, async (req, res) => {
+  try {
+    return res.send(req.user);
+  } catch (error) {
+    res.statusMessage =
+      "Update_error: Error while getting profile data..Try again later.";
+    return res.status(402).json();
+  }
 });
 
 let port = process.env.PORT || 3001;
