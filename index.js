@@ -315,17 +315,17 @@ const authMiddleware = async function (req, res, next) {
     const token = req.header("Authorization").split(" ")[1];
     const decoded = jwt.verify(token, process.env.AUTH_SECRET);
     accountHolder.findOne(
-      { accountNumber: decoded.accountNumber, authToken: token },
+      { accountNumber: decoded.accountNumber },
       function (err, user) {
         if (err) {
-          console.log("Error while logging out user. " + err);
+          console.log("Error while verifying user. " + err);
         }
         if (user) {
           req.user = user;
           req.token = token;
           next();
         } else {
-          throw new Error("Error while logging out user.");
+          throw new Error("User not found during verification of token.");
         }
       }
     );
