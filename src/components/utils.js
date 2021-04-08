@@ -19,13 +19,25 @@ export const maintainSession = () => {
   const currentPath = window.location.pathname;
   if (user_token) {
     store.dispatch(initiateGetProfile());
-    if (currentPath !== "/accoutDashBoard" && currentPath !== "/sendMoney") {
-      history.push("/");
+    if (currentPath === "/accoutDashBoard" || currentPath === "/sendMoney") {
+      if (window.location.origin === "http://localhost:3000") {
+        history.push(currentPath);
+      } else {
+        window.location = window.location.origin + currentPath;
+      }
     } else {
-      history.push(currentPath);
+      if (window.location.origin === "http://localhost:3000") {
+        history.push("/accoutDashBoard");
+      } else {
+        window.location = window.location.origin + "/accoutDashBoard";
+      }
     }
   } else {
-    history.push("/");
+    if (window.location.origin === "http://localhost:3000") {
+      history.push("/");
+    } else {
+      window.location = window.location.origin;
+    }
   }
 };
 

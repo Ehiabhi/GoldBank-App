@@ -165,7 +165,6 @@ export const viewRegisteredUsers = () => {
       });
       const usersList = await response.json();
       dispatch(updateClientList(usersList));
-      return usersList;
     } catch (error) {
       var errmess = new Error(error.message);
       alert(errmess);

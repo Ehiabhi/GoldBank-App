@@ -18,11 +18,7 @@ export default function SendMoney({
 
   useEffect(() => {
     const list = document.getElementById("usersList");
-    list.style.display = "none";
-    if (list.innerHTML !== "") {
-      list.style.display = "block";
-      return false;
-    }
+    list.innerHTML = "";
     if (usersList.length !== 0) {
       usersList.forEach((entry, index) => {
         list.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
@@ -33,9 +29,11 @@ export default function SendMoney({
           </div>
           `;
       });
+      list.style.display = "block";
+    } else {
+      list.style.display = "none";
     }
-    list.style.display = "block";
-  });
+  }, [usersList]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -122,13 +120,14 @@ export default function SendMoney({
           >
             Transfer
           </button>
-
-          <button className="btn btn-outline-primary" onClick={viewList}>
-            View List of Registered Users
-          </button>
         </div>
       </form>
-      <div id="usersList"></div>
+      <br />
+      <button className="btn btn-outline-primary" onClick={viewList}>
+        View List of Registered Users
+      </button>
+      <br />
+      <div id="usersList" style={{ display: "none" }}></div>
     </>
   );
 }
