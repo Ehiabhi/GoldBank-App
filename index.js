@@ -281,11 +281,7 @@ app.post("/transfer", (req, res) => {
 });
 
 app.get("/*", (req, res) => {
-  res.sendFile("index.html", function (err) {
-    if (err) {
-      res.status(500).send(err);
-    }
-  });
+  res.sendFile("index.html");
 });
 
 app.get("/viewRegisteredUsers", (req, res) => {
