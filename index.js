@@ -280,6 +280,14 @@ app.post("/transfer", (req, res) => {
   });
 });
 
+app.get("/*", (req, res) => {
+  res.sendFile("index.html", function (err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
+
 app.get("/viewRegisteredUsers", (req, res) => {
   accountHolder.find({}, {}, {}, (err, userList) => {
     if (err) {
