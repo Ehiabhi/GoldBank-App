@@ -14,20 +14,20 @@ app.use(express.static(path.join(__dirname, "./build")));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// mongoose.connect("mongodb://localhost/goldBank", {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// });
+mongoose.connect("mongodb://localhost/goldBank", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-mongoose.connect(
-  "mongodb+srv://admin-ehis:" +
-    process.env.PASSWORD +
-    "@cluster0.5p0bt.mongodb.net/goldBank",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+// mongoose.connect(
+//   "mongodb+srv://admin-ehis:" +
+//     process.env.PASSWORD +
+//     "@cluster0.5p0bt.mongodb.net/goldBank",
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   }
+// );
 mongoose.set("useFindAndModify", false);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -92,7 +92,7 @@ app.post("/signup", (req, res) => {
         );
         res.statusMessage =
           "User with the same full name exist. Kindly choose another and try agian.";
-        return res.status(420).json();
+        return res.status(408).json();
       } else {
         // Check for existing phone number.
         accountHolder.findOne(
@@ -109,7 +109,9 @@ app.post("/signup", (req, res) => {
               console.log(
                 "User with the same phone number exist. Kindly choose another and try again."
               );
-              return res.status(420).json();
+              res.statusMessage =
+                "User with the same phone number exist. Kindly choose another and try again.";
+              return res.status(409).json();
             } else {
               bcrypt.hash(
                 userFormDetail.password,
@@ -188,8 +190,9 @@ app.post("/login", (req, res) => {
                 });
               });
             } else {
-              console.log("Incorrect login details.");
-              throw new Error();
+              console.log("Incorrect login password.");
+              res.statusMessage = "Incorrect login password.";
+              return res.status(403).json();
             }
           }
         );
@@ -278,10 +281,6 @@ app.post("/transfer", (req, res) => {
       });
     }
   });
-});
-
-app.get("/*", (req, res) => {
-  res.sendFile("index.html");
 });
 
 app.get("/viewRegisteredUsers", (req, res) => {
