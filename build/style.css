@@ -1,22 +1,22 @@
-body, html {
-    height: 100%;
+html {
+    background-color: black;
+    padding: 5% auto;
 }
 
 #root {
-    background-image: url("./images/goldbanklogo.png");
-    background-blend-mode: multiply;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-color: #000000b0;
+    background-color: black;
+    height: 100%;
 }
 
-/* body {
-    background: url("./images/goldbanklogo.png") no-repeat center center fixed;
-    background-size: cover;
-    background-blend-mode: multiply;
-    height: 100%;
-} */
+#cont {
+    padding: 5% 0;
+}
+
+#dashBoardRow {
+    background-color: rgba(233, 161, 67, 0.836);
+    border-radius: 5px;
+    color: black;
+}
 
 #navLink {
     display: block;
