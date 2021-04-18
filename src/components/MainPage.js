@@ -10,7 +10,7 @@ import {
   Redirect,
 } from "react-router-dom";
 import { connect } from "react-redux";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   postLogin,
@@ -19,6 +19,7 @@ import {
   postSignUp,
   viewRegisteredUsers,
 } from "../redux/actions/actions";
+
 import { createBrowserHistory } from "history";
 
 export const history = createBrowserHistory();
@@ -32,6 +33,11 @@ function MainPage({
   viewUserList,
   usersList,
 }) {
+  const handleLogOut = () => {
+    logout();
+    toast.success("You've been logged out successfully.");
+  };
+
   return (
     <>
       <ToastContainer
@@ -39,33 +45,41 @@ function MainPage({
         autoClose={3000}
         hideProgressBar={true}
       />
-      <Router>
-        <Switch>
-          <Route path="/login" component={() => <Login login={login} />} />
-          <Route path="/signup" component={() => <Signup signup={signup} />} />
-          <Route
-            path="/sendMoney"
-            component={() => (
-              <SendMoney
-                sendMoney={sendMoney}
-                viewUsersList={viewUserList}
-                senderInfo={loggedInClient.clientData}
-                usersList={usersList}
-              />
-            )}
-          />
+      <div className="row">
+        <Router>
+          <Switch>
+            <Route path="/login" component={() => <Login login={login} />} />
+            <Route
+              path="/signup"
+              component={() => <Signup signup={signup} />}
+            />
+            <Route
+              path="/sendMoney"
+              component={() => (
+                <SendMoney
+                  sendMoney={sendMoney}
+                  viewUsersList={viewUserList}
+                  senderInfo={loggedInClient.clientData}
+                  usersList={usersList}
+                  logout={handleLogOut}
+                />
+              )}
+            />
 
-          <Route
-            path="/accoutDashBoard"
-            exact
-            component={() => (
-              <Dashboard info={loggedInClient.clientData} logout={logout} />
-            )}
-          />
-          <Route path="/" exact component={() => <Login login={login} />} />
-          <Redirect to="/" />
-        </Switch>
-      </Router>
+            <Route
+              path="/accoutDashBoard"
+              component={() => (
+                <Dashboard
+                  info={loggedInClient.clientData}
+                  logout={handleLogOut}
+                />
+              )}
+            />
+            <Route path="/" exact component={() => <Login login={login} />} />
+            <Redirect to="/" />
+          </Switch>
+        </Router>
+      </div>
     </>
   );
 }

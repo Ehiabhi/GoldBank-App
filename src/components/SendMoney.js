@@ -1,19 +1,37 @@
 import React, { useEffect, useState } from "react";
+import Header from "./Header";
+import Button from "@material-ui/core/Button";
 import { Redirect } from "react-router-dom";
 import { toast } from "react-toastify";
+import { makeStyles } from "@material-ui/core";
+
+const useStyles = makeStyles((theme) => ({
+  button: {
+    margin: theme.spacing(1),
+    width: "10rem",
+    color: "#ff0080",
+    "&:hover": {
+      color: "#fff",
+      backgroundColor: "#ff0080",
+    },
+  },
+}));
 
 export default function SendMoney({
   senderInfo,
   sendMoney,
   viewUsersList,
   usersList,
+  logout,
 }) {
+  const classes = useStyles();
   const [transferFormData, setTransferFormData] = useState({
     benAcctNum: "",
     benFullName: "",
     amount: "",
     narration: "",
   });
+  const [buttonContent, setButtonContent] = useState(false);
   const [goToDashboard, setGoToDashboard] = useState(false);
 
   useEffect(() => {
@@ -24,7 +42,7 @@ export default function SendMoney({
         list.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
             <ul class="list-group transactionList">
               <li class="list-group-item">Name: ${entry.name}</li>
-              <li class="list-group-item">AccountNumber: ${entry.accountNumber}</li>
+              <li class="list-group-item">AccountNumber: 0${entry.accountNumber}</li>
             </ul>
           </div>
           `;
@@ -47,12 +65,14 @@ export default function SendMoney({
     e.preventDefault();
     if (transferFormData.benAcctNum === "" || transferFormData.amount === "") {
       toast.error("Beneficiary name and amount cannot be empty.", {
-        autoClose: 6000,
+        autoClose: 3000,
       });
       return false;
     }
     if (senderInfo.accountBalance < transferFormData.amount) {
-      alert("Insufficient funds");
+      toast.error("Insufficient funds", {
+        autoClose: false,
+      });
       return false;
     }
     const dataToSend = {
@@ -67,13 +87,14 @@ export default function SendMoney({
   };
 
   const viewList = () => {
+    // setButtonContent(!buttonContent);
     viewUsersList();
   };
 
   return (
-    <>
+    <div className="col-xs-12" id="sendMoney">
       {goToDashboard && <Redirect to="/accoutDashBoard" />}
-      <h1>Gold Bank</h1>
+      <Header handleLogOut={logout} />
       <h2>Transfer Funds</h2>
       <form>
         <div className="form-group">
@@ -113,21 +134,31 @@ export default function SendMoney({
           />
         </div>
         <div className="action-items">
-          <button
-            className="btn btn-primary"
+          <Button
+            name="credit"
+            variant="contained"
+            className={classes.button}
             type="submit"
             onClick={TransferMoney}
+            size="large"
           >
             Transfer
-          </button>
+          </Button>
         </div>
       </form>
       <br />
-      <button className="btn btn-outline-primary" onClick={viewList}>
-        View List of Registered Users
-      </button>
+      <Button
+        name="credit"
+        variant="contained"
+        className={classes.button}
+        onClick={viewList}
+        size="large"
+      >
+        {!buttonContent ? "View All Users" : "Close"}
+      </Button>
+
       <br />
       <div id="usersList" style={{ display: "none" }}></div>
-    </>
+    </div>
   );
 }

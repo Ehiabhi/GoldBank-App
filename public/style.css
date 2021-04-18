@@ -1,3 +1,25 @@
+html {
+    background-color: black;
+    padding: 5% auto;
+}
+
+#root {
+    background-color: black;
+    height: 100%;
+}
+
+#cont {
+    padding: 5% 0;
+}
+
+#dashBoardRow, #sendMoney {
+    background-color: rgba(233, 161, 67, 0.836);
+    border-radius: 5px;
+    color: black;
+    margin: auto;
+    padding: 1rem 2rem;
+}
+
 #navLink {
     display: block;
     width: 30%;
@@ -5,6 +27,7 @@
 
 .transactionContainer {
     padding: 2px;
+    background-color: rgba(233, 161, 67, 0.836);
 }
 
 .transactionList>li {

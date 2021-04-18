@@ -3,7 +3,7 @@ import Main from "./MainPage";
 
 function App() {
   return (
-    <div className="container">
+    <div id="cont" className="container">
       <Main />
     </div>
   );

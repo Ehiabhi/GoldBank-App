@@ -27,8 +27,11 @@ export const postLogin = (formData) => (dispatch) => {
       if (response.ok) {
         return response;
       } else {
-        console.log("An error occured " + response.text);
-        let error = new Error("Error: " + response.statusText);
+        let error = new Error();
+        error.message = {
+          text: response.statusText,
+          status: response.status,
+        };
         throw error;
       }
     })
@@ -39,9 +42,7 @@ export const postLogin = (formData) => (dispatch) => {
       return { success: true };
     })
     .catch((error) => {
-      var errmess = new Error(error.message);
-      alert(errmess);
-      return { success: false };
+      throw error;
     });
 };
 
@@ -91,14 +92,16 @@ export const postSignUp = (formData) => (dispatch) => {
       if (response.ok) {
         return true;
       } else {
-        console.log("An error occured " + response.text);
-        let error = new Error("Error: " + response.statusText);
+        let error = new Error();
+        error.message = {
+          text: response.statusText,
+          status: response.status,
+        };
         throw error;
       }
     })
     .catch((err) => {
-      var errmess = new Error(err.message);
-      throw errmess;
+      throw err;
     });
 };
 

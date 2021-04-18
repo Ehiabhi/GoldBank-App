@@ -1,7 +1,21 @@
-// import jwt_decode from "jwt-decode";
+import Link from "@material-ui/core/Link";
+import Typography from "@material-ui/core/Typography";
 import { history } from "./MainPage";
 import { initiateGetProfile } from "../redux/actions/actions";
 import { store } from "../index";
+
+export function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {"Copyright © "}
+      <Link color="inherit" href="#">
+        Gold Bank PLC
+      </Link>{" "}
+      {new Date().getFullYear()}
+      {"."}
+    </Typography>
+  );
+}
 
 export function greeting() {
   const currentHour = new Date().getHours();
@@ -20,24 +34,12 @@ export const maintainSession = () => {
   if (user_token) {
     store.dispatch(initiateGetProfile());
     if (currentPath === "/accoutDashBoard" || currentPath === "/sendMoney") {
-      if (window.location.origin === "http://localhost:3000") {
-        history.push(currentPath);
-      } else {
-        window.location = window.location.origin + currentPath;
-      }
+      history.push(currentPath);
     } else {
-      if (window.location.origin === "http://localhost:3000") {
-        history.push("/accoutDashBoard");
-      } else {
-        window.location = window.location.origin + "/accoutDashBoard";
-      }
+      history.push("/accoutDashBoard");
     }
   } else {
-    if (window.location.origin === "http://localhost:3000") {
-      history.push("/");
-    } else {
-      window.location = window.location.origin;
-    }
+    history.push("/");
   }
 };
 
