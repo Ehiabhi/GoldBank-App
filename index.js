@@ -9,7 +9,9 @@ let path = require("path");
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, "./build")));
+// app.use(express.static(path.join(__dirname, "./build")));
+//Pluralsight's implementation
+app.use(express.static(path.join(__dirname, "build")));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -28,6 +30,7 @@ mongoose.connect(
     useUnifiedTopology: true,
   }
 );
+
 mongoose.set("useFindAndModify", false);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -74,6 +77,10 @@ const accountSchema = new mongoose.Schema({
 });
 
 const accountHolder = mongoose.model("accountHolder", accountSchema);
+
+app.get("/*", function (req, res) {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 app.post("/signup", (req, res) => {
   const userFormDetail = req.body;
@@ -283,7 +290,7 @@ app.post("/transfer", (req, res) => {
   });
 });
 
-app.get("/viewRegisteredUsers", (req, res) => {
+app.post("/viewRegisteredUsers", (req, res) => {
   accountHolder.find({}, {}, {}, (err, userList) => {
     if (err) {
       console.log("Error while fetching list of users. " + err);
@@ -372,7 +379,7 @@ app.post("/logout", authMiddleware, async (req, res) => {
   }
 });
 
-app.get("/getProfile", authMiddleware, async (req, res) => {
+app.post("/getProfile", authMiddleware, async (req, res) => {
   try {
     return res.send(req.user);
   } catch (error) {
