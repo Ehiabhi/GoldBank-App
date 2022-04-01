@@ -9,8 +9,6 @@ let path = require("path");
 
 const app = express();
 
-// app.use(express.static(path.join(__dirname, "./build")));
-//Pluralsight's implementation
 app.use(express.static(path.join(__dirname, "build")));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -225,12 +223,19 @@ app.post("/transfer", (req, res) => {
         sender.accountBalance -= receipient.amount;
       }
       sender.transactionHistory.push({
-        Date: "Transaction date: " + transactionDate,
-        Type: "Transaction type: Dr",
-        AcctNum: "AccountNumber: " + sender.accountNumber,
-        Amount: "Amount: #" + receipient.amount,
-        Narration: "Narration: " + receipient.narration,
+        Date: transactionDate,
+        Type: "Dr",
+        AcctNum: sender.accountNumber,
+        Amount: receipient.amount,
+        Narration: receipient.narration,
       });
+      // sender.transactionHistory.push({
+      //   Date: "Transaction date: " + transactionDate,
+      //   Type: "Transaction type: Dr",
+      //   AcctNum: "AccountNumber: " + sender.accountNumber,
+      //   Amount: "Amount: #" + receipient.amount,
+      //   Narration: "Narration: " + receipient.narration,
+      // });
       sender.save((err) => {
         if (err) {
           console.log("Error while saving user's info to database " + err);
@@ -261,11 +266,11 @@ app.post("/transfer", (req, res) => {
             } else {
               receiver.accountBalance += Number(receipient.amount);
               receiver.transactionHistory.push({
-                Date: "Transaction date: " + transactionDate,
-                Type: "Transaction type: Cr",
-                AcctNum: "AccountNumber: " + receiver.accountNumber,
-                Amount: "Amount: #" + receipient.amount,
-                Narration: "Narration: " + receipient.narration,
+                Date: transactionDate,
+                Type: "Cr",
+                AcctNum: receiver.accountNumber,
+                Amount: receipient.amount,
+                Narration: receipient.narration,
               });
               receiver.save((err) => {
                 if (err) {
