@@ -1,3 +1,14 @@
+:root {
+  --toastify-toast-width: 150px;
+}
+
+.Toastify__toast-container {
+  width: 50vw;
+  padding: 0;
+  right: 0;
+  margin: 0;
+}
+
 html {
   background-color: black;
   /* padding: 5% auto; */
@@ -145,4 +156,8 @@ html {
   #table > tbody > tr > td {
     font-size: 1rem;
   }
+}
+
+#foo {
+  width: 50vw;
 }
