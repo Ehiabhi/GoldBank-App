@@ -1,17 +1,14 @@
-:root {
-  --toastify-toast-width: 150px;
-}
-
-.Toastify__toast-container {
-  width: 50vw;
-  padding: 0;
-  right: 0;
-  margin: 0;
+*,
+html,
+body,
+#root {
+  font-family: "DM Sans", sans-serif;
+  font-family: "Lato", sans-serif;
 }
 
 html {
   background-color: black;
-  /* padding: 5% auto; */
+  font-family: "Lato", sans-serif;
 }
 
 #root {
@@ -21,6 +18,10 @@ html {
 
 #cont {
   padding: 5% 0;
+}
+
+#dashBoard > button {
+  background-color: red;
 }
 
 #dashBoard {
@@ -51,7 +52,8 @@ html {
   flex-grow: 4;
 }
 
-#dashBoard button {
+#dashBoard button,
+#dashBoard > button {
   order: 1;
   flex-grow: 1;
 }
@@ -79,11 +81,6 @@ html {
   margin-bottom: 0;
 }
 
-/* #navLink {
-  display: block;
-  width: 30%;
-} */
-
 #transact {
   height: 30vh;
   margin-top: 1rem;
@@ -91,18 +88,11 @@ html {
   overflow-y: scroll;
 }
 
-#transactHistory,
-#transactHistoryDebit,
-#transactHistoryCredit {
-  display: none;
-}
-
 #transactHistory {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   height: 100%;
-  /* margin-top: 1.625rem; */
 }
 
 #table,
@@ -111,6 +101,7 @@ html {
   font-size: 0.5rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  color: #000;
 }
 
 #trow {
@@ -134,11 +125,6 @@ html {
   padding: 0;
 }
 
-.action-items {
-  display: flex;
-  justify-content: space-between;
-}
-
 #foot {
   display: flex;
   flex-direction: row;
@@ -150,11 +136,65 @@ html {
   font-size: 0.5rem;
 }
 
+/* Signup page */
+#select {
+  width: 100%;
+}
+
+/* Transfer Page */
+#transferForm {
+  background-color: #000;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 2rem;
+  color: #ffb13cb4;
+}
+
+#transferForm h4 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+#transferForm label {
+  color: #fff;
+}
+
+.label {
+  margin-bottom: 0.1rem;
+  margin-top: 0.5rem;
+}
+
+#mui_butt1 {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #ffb13cb4;
+  display: block;
+  margin-top: 2rem;
+}
+
+/* #destinationAccNum ~ label {
+  display: none;
+}
+
+#destinationAccName {
+  display: none;
+} */
+
 @media screen and (min-width: 834px) {
   #table,
   #table > thead > tr > th,
   #table > tbody > tr > td {
     font-size: 1rem;
+  }
+
+  #foot button {
+    font-size: 0.9rem;
+  }
+
+  #form {
+    width: 40%;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
