@@ -7,12 +7,12 @@ body,
 }
 
 html {
-  background-color: black;
+  background-color: #e9a143d5;
   font-family: "Lato", sans-serif;
 }
 
 #root {
-  background-color: black;
+  background-color: #e9a143d5;
   height: 100%;
 }
 
@@ -36,12 +36,12 @@ html {
 
 #dashBoardRow,
 #sendMoney {
-  background-color: rgba(233, 161, 67, 0.836);
+  /* background-color: #e9a143d5; */
   border-radius: 5px;
-  width: 70%;
+  width: 90%;
   color: black;
   margin: auto;
-  padding: 1rem;
+  /* padding: 1rem; */
   /* height: ; */
 }
 
