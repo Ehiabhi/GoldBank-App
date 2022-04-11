@@ -386,11 +386,11 @@ app.post("/logout", authMiddleware, async (req, res) => {
 
 app.post("/acctNumInquiry", (req, res) => {
   accountHolder.findOne(
-    { accountNumber: req.body.accountNumber },
-    (err, res) => {
+    { accountNumber: req.body.benAcctNum },
+    (err, result) => {
       if (err) console.log("Error while searching db for account holder");
-      if (res) {
-        res.status(200).json();
+      if (result) {
+        res.status(200).json(result);
       } else {
         res.statusMessage =
           "User with the account number does not exist. Kindly input a valid account number.";
