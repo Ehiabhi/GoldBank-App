@@ -28,6 +28,12 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#000000b0",
     padding: "10px",
   },
+  image: {
+    backgroundRepeat: "no-repeat",
+    backgroundColor: "transparent",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  },
   paper: {
     margin: theme.spacing(8, 4),
     display: "flex",
@@ -131,6 +137,22 @@ export default function SignUp({ signup }) {
       return false;
     }
 
+    if (signupFormData.contact.length < 11) {
+      setSignupFormData((prevState) => {
+        return {
+          ...prevState,
+          error: {
+            ...prevState.error,
+            contact: {
+              status: true,
+              message: "Contact number must be exactly 11 digits long.",
+            },
+          },
+        };
+      });
+      return false;
+    }
+
     signup(signupFormData)
       .then((status) => {
         toast.success("Sign up successful.");
@@ -165,7 +187,26 @@ export default function SignUp({ signup }) {
 
   const handleInputChange = (e) => {
     e.preventDefault();
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (name === "contact") {
+      console.log(value.length);
+      if (value.length > 11) {
+        value = value.slice(0, 11);
+        setSignupFormData((prevState) => {
+          return {
+            ...prevState,
+            error: {
+              ...prevState.error,
+              contact: {
+                status: true,
+                message: "Account number cannot exceed 11 digits.",
+              },
+            },
+          };
+        });
+        return;
+      }
+    }
     setSignupFormData((prevState) => {
       return {
         ...prevState,
@@ -201,18 +242,19 @@ export default function SignUp({ signup }) {
       {goToLogin && <Redirect to="/login" />}
       <Grid container component="main" className={classes.root}>
         <CssBaseline />
-        <Grid item xs={false} sm={2} md={3} />
+        {/* <Grid item xs={false} sm={2} md={3} /> */}
+        <Grid item xs={1} sm={2} md={false} lg={8} className={classes.image} />
         <Grid
           item
-          xs={12}
+          xs={10}
           sm={8}
-          md={6}
+          md={4}
+          lg={4}
           className={classes.back}
           component={Paper}
           elevation={6}
           square
         >
-          <Grid item xs={false} sm={2} md={3} />
           <div className={classes.paper}>
             <Avatar className={classes.avatar}>
               <LockOutlinedIcon />
@@ -263,7 +305,11 @@ export default function SignUp({ signup }) {
                     autoComplete="lname"
                   />
                 </Grid>
-                <FormControl variant="outlined" className={classes.formControl}>
+                <FormControl
+                  variant="outlined"
+                  className={classes.formControl}
+                  id="select"
+                >
                   <InputLabel>Gender</InputLabel>
                   <Select
                     name="gender"
@@ -331,12 +377,8 @@ export default function SignUp({ signup }) {
             <Box mt={5}>{Copyright()}</Box>
           </div>
         </Grid>
+        <Grid item xs={1} sm={2} md={8} lg={false} className={classes.image} />
       </Grid>
-
-      {/* <Container className={classes.back} component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}></div>
-      </Container> */}
     </>
   );
 }

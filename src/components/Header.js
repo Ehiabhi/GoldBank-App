@@ -1,5 +1,6 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
+// import Buttons from "./Buttons";
 
 function Header({ handleLogOut, history }) {
   const logout = () => {
@@ -7,15 +8,18 @@ function Header({ handleLogOut, history }) {
     history.push("/");
   };
   return (
-    <div className="row">
-      <div id="dashBoard" className="col-md-6">
-        <h1>Gold Bank</h1>
-      </div>
-      <div className="offset-md-3 col-md-3">
-        <button className="btn btn-danger" onClick={logout}>
-          Log out
-        </button>
-      </div>
+    <div id="dashBoard" className="col-xs-6 col-md-6">
+      <h1>Gold Bank</h1>
+      {/* <Buttons
+        id="logoutButton"
+        name="logout"
+        value1="Log out"
+        fetchAction={logout}
+      /> */}
+      {/* <BiPowerOff /> */}
+      <button className="btn btn-danger" onClick={logout}>
+        Log out
+      </button>
     </div>
   );
 }

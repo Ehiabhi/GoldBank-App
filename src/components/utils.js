@@ -28,18 +28,33 @@ export function greeting() {
   }
 }
 
+// export const maintainSession = () => {
+//   const user_token = localStorage.getItem("user_token");
+//   const currentPath = window.location.pathname;
+//   if (user_token) {
+//     store.dispatch(initiateGetProfile());
+//     if (currentPath === "/accoutDashBoard" || currentPath === "/sendMoney") {
+//       history.push(currentPath);
+//     } else {
+//       history.push("/accoutDashBoard");
+//     }
+//   } else {
+//     history.push("/");
+//   }
+// };
+
 export const maintainSession = () => {
   const user_token = localStorage.getItem("user_token");
-  const currentPath = window.location.pathname;
+  const currentHash = window.location.hash;
   if (user_token) {
     store.dispatch(initiateGetProfile());
-    if (currentPath === "/accoutDashBoard" || currentPath === "/sendMoney") {
-      history.push(currentPath);
+    if (currentHash === "#/accoutDashBoard" || currentHash === "#/sendMoney") {
+      history.push("/" + currentHash);
     } else {
-      history.push("/accoutDashBoard");
+      history.push("/#/accoutDashBoard");
     }
   } else {
-    history.push("/");
+    history.push("/#/");
   }
 };
 
@@ -47,3 +62,5 @@ export const setAuthHeader = () => {
   const token = localStorage.getItem("user_token");
   return token;
 };
+
+

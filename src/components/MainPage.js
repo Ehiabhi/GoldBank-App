@@ -4,7 +4,7 @@ import Signup from "./SignUp";
 import Dashboard from "./AccountDashboard";
 import SendMoney from "./SendMoney";
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Switch,
   Route,
   Redirect,
@@ -18,6 +18,7 @@ import {
   postTransferMoney,
   postSignUp,
   viewRegisteredUsers,
+  getUserProfile,
 } from "../redux/actions/actions";
 
 import { createBrowserHistory } from "history";
@@ -32,6 +33,8 @@ function MainPage({
   logout,
   viewUserList,
   usersList,
+  accountHolderName,
+  fetchUserProfile,
 }) {
   const handleLogOut = () => {
     logout();
@@ -62,6 +65,8 @@ function MainPage({
                   senderInfo={loggedInClient.clientData}
                   usersList={usersList}
                   logout={handleLogOut}
+                  accountHolderName={accountHolderName.receiverInfo}
+                  getUserProfile={fetchUserProfile}
                 />
               )}
             />
@@ -90,12 +95,14 @@ const mapDispatchToProps = (dispatch) => ({
   signup: (data) => dispatch(postSignUp(data)),
   logout: () => dispatch(postLogout()),
   viewUserList: () => dispatch(viewRegisteredUsers()),
+  fetchUserProfile: (acctNum) => dispatch(getUserProfile(acctNum)),
 });
 
 function mapStateToProps(state) {
   return {
     loggedInClient: state.loggedInClient,
     usersList: state.updateClientListDataReducer,
+    accountHolderName: state.updateInitialClientAccountNameReducer,
   };
 }
 

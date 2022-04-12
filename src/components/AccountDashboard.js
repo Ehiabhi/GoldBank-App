@@ -1,25 +1,11 @@
 import React, { useState, useEffect } from "react";
-import Button from "@material-ui/core/Button";
 import Header from "./Header";
 import { greeting } from "./utils";
 import { Redirect } from "react-router-dom";
 import dateformat from "dateformat";
-import { makeStyles } from "@material-ui/core";
-
-const useStyles = makeStyles((theme) => ({
-  button: {
-    margin: theme.spacing(1),
-    width: "10rem",
-    color: "#ff0080",
-    "&:hover": {
-      color: "#fff",
-      backgroundColor: "#ff0080",
-    },
-  },
-}));
+import Buttons from "./Buttons";
 
 function Dashboard({ info, logout }) {
-  const classes = useStyles();
   const [customerInfo, setCustomerInfo] = useState({
     accountBalance: null,
     accountNumber: null,
@@ -28,7 +14,7 @@ function Dashboard({ info, logout }) {
     lastloggedIn: null,
     _id: null,
   });
-  const [buttonContent, setButtonContent] = useState({
+  const [transactionView, setTransactionView] = useState({
     all: false,
     debit: false,
     credit: false,
@@ -37,236 +23,157 @@ function Dashboard({ info, logout }) {
 
   useEffect(() => {
     setCustomerInfo(info);
+    fetchTransactionHistory("all");
   }, [info]);
+
+  // console.log("Hi");
 
   const handleSendMoney = () => {
     setRouteToSendMoney(true);
   };
 
-  const closeStatement = (e) => {
-    const name = e.currentTarget.name;
-    switch (name) {
-      case "all":
-        setButtonContent((prevState) => {
-          return { ...prevState, all: !prevState.all };
-        });
-        return;
-
-      case "credit":
-        setButtonContent((prevState) => {
-          return { ...prevState, credit: !prevState.credit };
-        });
-        return;
-
-      case "debit":
-        setButtonContent((prevState) => {
-          return { ...prevState, debit: !prevState.debit };
-        });
-        return;
-
-      default:
-        return null;
-    }
+  // create and display transaction table
+  const createTable = (tableContentArray) => {
+    const table = document.createElement("table");
+    table.className = "table";
+    table.id = "table";
+    table.innerHTML = `<thead>
+      <tr id="trow">
+        <th>Date</th>
+        <th>Type</th>
+        <th>Acct. No.</th>
+        <th>Amount</th>
+        <th>Narration</th>
+      </tr>
+    </thead>`;
+    const tbody = document.createElement("tbody");
+    tableContentArray.forEach((entry, index) => {
+      tbody.innerHTML += `<tr id="trow" key=${index}>
+      <td>${dateformat(entry.Date, "dd/mmm/yyyy HH:MM")}</td>
+      <td>${entry.Type}</td>
+      <td>0${entry.AcctNum}</td>
+      <td>${entry.Amount}</td>
+      <td>${entry.Narration}</td>
+    </tr>
+      `;
+    });
+    table.appendChild(tbody);
+    return table;
   };
 
+  // View all debit transaction history
   const fetchDebitTransaction = (e) => {
-    let d = document.getElementById("transactHistoryDebit");
-    if (!buttonContent.debit) {
-      document.getElementById("transactHistory").style.display = "none";
-      document.getElementById("transactHistoryCredit").style.display = "none";
-
-      d.style.display = "block";
-      let debitArray = info.transactionHistory.filter(
-        (entry) => entry.Type === "Transaction type: Dr"
-      );
-      if (debitArray.length === 0) {
-        if (d.innerHTML === "") {
-          d.innerHTML = "There are no entries to display.";
-        }
-      } else {
-        if (
-          d.innerHTML === "" ||
-          d.innerHTML === "There are no entries to display."
-        ) {
-          const h2 = document.createElement("h2");
-          h2.innerHTML = "Debit Transactions";
-          d.appendChild(h2);
-          debitArray.forEach((entry, index) => {
-            d.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
-                <ul class="list-group transactionList">
-                  <li class="list-group-item">${dateformat(
-                    entry.Date,
-                    "dd/mmm/yyyy HH:MM"
-                  )}</li>
-                  <li class="list-group-item">${entry.Type}</li>
-                  <li class="list-group-item">${entry.AcctNum}</li>
-                  <li class="list-group-item">${entry.Amount}</li>
-                  <li class="list-group-item">${entry.Narration}</li>
-                </ul>
-              </div>
-              `;
-          });
-        } else {
-          return false;
-        }
-      }
-    } else {
-      d.innerHTML = "";
-    }
-    closeStatement(e);
+    let d = document.getElementById("transactHistory");
+    processTransaction(d, "debit", e);
   };
-
+  // View all credit transaction history
   const fetchCreditTransaction = (e) => {
-    let c = document.getElementById("transactHistoryCredit");
-    if (!buttonContent.credit) {
-      document.getElementById("transactHistory").style.display = "none";
-      document.getElementById("transactHistoryDebit").style.display = "none";
-
-      c.style.display = "block";
-      let creditArray = info.transactionHistory.filter(
-        (entry) => entry.Type === "Transaction type: Cr"
-      );
-      if (creditArray.length === 0) {
-        if (c.innerHTML === "") {
-          c.innerHTML = "There are no entries to display.";
-        }
-      } else {
-        if (
-          c.innerHTML === "" ||
-          c.innerHTML === "There are no entries to display."
-        ) {
-          const h2 = document.createElement("h2");
-          h2.innerHTML = "Credit Transactions";
-          c.appendChild(h2);
-          creditArray.forEach((entry, index) => {
-            c.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
-                <ul class="list-group transactionList">
-                  <li class="list-group-item">${dateformat(
-                    entry.Date,
-                    "dd/mmm/yyyy HH:MM"
-                  )}</li>
-                  <li class="list-group-item">${entry.Type}</li>
-                  <li class="list-group-item">${entry.AcctNum}</li>
-                  <li class="list-group-item">${entry.Amount}</li>
-                  <li class="list-group-item">${entry.Narration}</li>
-                </ul>
-              </div>
-              `;
-          });
-        } else {
-          return false;
-        }
-      }
-    } else {
-      c.innerHTML = "";
-    }
-    closeStatement(e);
+    let c = document.getElementById("transactHistory");
+    processTransaction(c, "credit", e);
   };
-
+  // View all transaction history
   const fetchTransactionHistory = (e) => {
     let h = document.getElementById("transactHistory");
-    if (!buttonContent.all) {
-      document.getElementById("transactHistoryDebit").style.display = "none";
-      document.getElementById("transactHistoryCredit").style.display = "none";
-      h.style.display = "block";
-      if (info.transactionHistory.length === 0) {
-        if (h.innerHTML === "") {
-          h.innerHTML = "There are no entries to display.";
-        }
-      } else {
-        if (
-          h.innerHTML === "" ||
-          h.innerHTML === "There are no entries to display."
-        ) {
-          const h2 = document.createElement("h2");
-          h2.innerHTML = "Transaction History";
-          h.appendChild(h2);
-          info.transactionHistory.forEach((entry, index) => {
-            h.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
-                <ul class="list-group transactionList">
-                  <li class="list-group-item">${dateformat(
-                    entry.Date,
-                    "dd/mmm/yyyy HH:MM"
-                  )}</li>
-                  <li class="list-group-item">${entry.Type}</li>
-                  <li class="list-group-item">${entry.AcctNum}</li>
-                  <li class="list-group-item">${entry.Amount}</li>
-                  <li class="list-group-item">${entry.Narration}</li>
-                </ul>
-              </div>
-              `;
-          });
-          return;
-        } else {
-          return false;
-        }
+    processTransaction(h, "all", e);
+  };
+
+  const transactionArray = {
+    all: info.transactionHistory,
+
+    debit: info.transactionHistory.filter(
+      (entry) => entry.Type === "Transaction type: Dr" || entry.Type === "Dr"
+    ),
+
+    credit: info.transactionHistory.filter(
+      (entry) => entry.Type === "Transaction type: Cr" || entry.Type === "Cr"
+    ),
+  };
+
+  const processTransaction = (e1, type, e) => {
+    let x = e.currentTarget ? e.currentTarget.name : e;
+    if (!transactionView[x]) {
+      e1.innerHTML = "";
+    }
+    if (transactionArray[x].length === 0) {
+      if (e1.innerHTML === "") {
+        e1.innerHTML = "There are no entries to display.";
       }
     } else {
-      h.innerHTML = "";
+      if (
+        e1.innerHTML === "" ||
+        e1.innerHTML === "There are no entries to display."
+      ) {
+        const h4 = document.createElement("h4");
+        h4.innerHTML =
+          type === "all"
+            ? "Transaction History"
+            : type === "credit"
+            ? "Credit Transactions"
+            : "Debit Transactions";
+        e1.appendChild(h4);
+        // I used the map method to return a new reversed array since the reverse method was mutating the original array in redux store.
+        e1.appendChild(
+          createTable(transactionArray[x].map((item) => item).reverse())
+        );
+      } else {
+        return false;
+      }
     }
-    closeStatement(e);
+    setTransactionView(() => {
+      return {
+        all: false,
+        debit: false,
+        credit: false,
+        [x]: true,
+      };
+    });
   };
 
   return (
     <div className="col-xs-12" id="dashBoardRow">
       {routeToSendMoney && <Redirect to="/sendMoney" />}
       <Header handleLogOut={logout} />
-      <div className="col-xs-12">
-        <h2>
+      <div id="greet" className="col-xs-12">
+        <p>
           {greeting()},{" "}
           {customerInfo.fullName && customerInfo.fullName.split(" ")[0]}
-        </h2>
+        </p>
       </div>
       <div className="col-xs-12">
         <p>
-          Account No. #<b>0{customerInfo.accountNumber}</b>
+          Acct. No. #<b>0{customerInfo.accountNumber}</b>
         </p>
-        <h3>
-          Account Balance: =N= <b>{customerInfo.accountBalance}</b>
-        </h3>
-        <Button
-          name="all"
-          variant="contained"
-          className={classes.button}
-          onClick={handleSendMoney}
-          size="large"
-        >
-          Send Money
-        </Button>
-        <br />
-        <br />
-        <Button
-          name="all"
-          variant="contained"
-          className={classes.button}
-          onClick={fetchTransactionHistory}
-          size="large"
-        >
-          {!buttonContent.all ? "View Statement" : "Close"}
-        </Button>
-        <Button
-          name="debit"
-          variant="contained"
-          className={classes.button}
-          onClick={fetchDebitTransaction}
-          size="large"
-        >
-          {!buttonContent.debit ? "View Debits" : "Close"}
-        </Button>
-        <Button
-          name="credit"
-          variant="contained"
-          className={classes.button}
-          onClick={fetchCreditTransaction}
-          size="large"
-        >
-          {!buttonContent.credit ? "View Credits" : "Close"}
-        </Button>
-        <br />
-        <br />
-        <div id="transactHistory"></div>
-        <div id="transactHistoryDebit"></div>
-        <div id="transactHistoryCredit"></div>
+        <div id="accountBal">
+          <p>Account Balance</p>
+          <h2>
+            <b>=N={customerInfo.accountBalance}</b>
+          </h2>
+          <Buttons
+            name="all"
+            value1="Send money"
+            fetchAction={handleSendMoney}
+          />
+        </div>
+        <div id="transact">
+          <div id="transactHistory"></div>
+        </div>
+        <footer id="foot">
+          <Buttons
+            name="all"
+            value1="View Statement"
+            fetchAction={fetchTransactionHistory}
+          />
+          <Buttons
+            name="debit"
+            value1="View Debits"
+            fetchAction={fetchDebitTransaction}
+          />
+          <Buttons
+            name="credit"
+            value1="View Credits"
+            fetchAction={fetchCreditTransaction}
+          />
+        </footer>
       </div>
     </div>
   );

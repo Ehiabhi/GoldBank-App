@@ -71,6 +71,19 @@ function Login({ login, history }) {
 
   const logIn = async (e) => {
     e.preventDefault();
+    if (loginFormData.accountNumber.length < 11) {
+      setLoginFormData((prev) => {
+        return {
+          ...prev,
+          error: {
+            ...prev.error,
+            acctStatus: true,
+            acctMessage: "Account Number must be exactly 11 characters.",
+          },
+        };
+      });
+      return false;
+    }
     login(loginFormData)
       .then((status) => {
         if (status.success) {
@@ -109,31 +122,46 @@ function Login({ login, history }) {
 
   const handleInputChange = (e) => {
     e.preventDefault();
-    const { name, value } = e.target;
-    setLoginFormData((prevState) => {
-      return {
-        ...prevState,
-        [name]: value,
-        error: {
-          acctStatus: false,
-          acctMessage: "",
-          passwordStatus: false,
-          passwordMessage: "",
-        },
-      };
-    });
+    if (e.target.value.length < 12) {
+      const { name, value } = e.target;
+      setLoginFormData((prevState) => {
+        return {
+          ...prevState,
+          [name]: value,
+          error: {
+            acctStatus: false,
+            acctMessage: "",
+            passwordStatus: false,
+            passwordMessage: "",
+          },
+        };
+      });
+    } else {
+      setLoginFormData((prev) => {
+        return {
+          ...prev,
+          error: {
+            ...prev.error,
+            acctStatus: true,
+            acctMessage: "Account Number cannot exceed 11 characters.",
+          },
+        };
+      });
+      return false;
+    }
   };
 
   return (
     <>
       <Grid container component="main" className={classes.root}>
         <CssBaseline />
-        <Grid item xs={false} sm={4} md={7} className={classes.image} />
+        <Grid item xs={1} sm={2} md={false} lg={8} className={classes.image} />
         <Grid
           item
-          xs={12}
+          xs={10}
           sm={8}
-          md={5}
+          md={4}
+          lg={4}
           className={classes.back}
           component={Paper}
           elevation={6}
@@ -161,8 +189,7 @@ function Login({ login, history }) {
                 fullWidth
                 label="Account/Phone Number"
                 name="accountNumber"
-                autoComplete="email"
-                value={loginFormData.fullName}
+                value={loginFormData.accountNumber}
                 onChange={handleInputChange}
                 autoFocus
               />
@@ -178,7 +205,7 @@ function Login({ login, history }) {
                 label="Password"
                 type="password"
                 onChange={handleInputChange}
-                value={loginFormData.fullName}
+                value={loginFormData.password}
               />
               <Button
                 type="submit"
@@ -201,6 +228,7 @@ function Login({ login, history }) {
             </form>
           </div>
         </Grid>
+        <Grid item xs={1} sm={2} md={8} lg={false} className={classes.image} />
       </Grid>
     </>
   );

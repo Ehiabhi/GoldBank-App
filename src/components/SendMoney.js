@@ -1,21 +1,9 @@
+// import React, { useState } from "react";
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
-import Button from "@material-ui/core/Button";
 import { Redirect } from "react-router-dom";
 import { toast } from "react-toastify";
-import { makeStyles } from "@material-ui/core";
-
-const useStyles = makeStyles((theme) => ({
-  button: {
-    margin: theme.spacing(1),
-    width: "10rem",
-    color: "#ff0080",
-    "&:hover": {
-      color: "#fff",
-      backgroundColor: "#ff0080",
-    },
-  },
-}));
+import Buttons from "./Buttons";
 
 export default function SendMoney({
   senderInfo,
@@ -23,39 +11,70 @@ export default function SendMoney({
   viewUsersList,
   usersList,
   logout,
+  accountHolderName,
+  getUserProfile,
 }) {
-  const classes = useStyles();
   const [transferFormData, setTransferFormData] = useState({
     benAcctNum: "",
     benFullName: "",
     amount: "",
     narration: "",
   });
-  const [buttonContent, setButtonContent] = useState(false);
+  // const [buttonContent] = useState(false);
   const [goToDashboard, setGoToDashboard] = useState(false);
+  const [accountHolderInfo] = useState(accountHolderName);
 
   useEffect(() => {
-    const list = document.getElementById("usersList");
-    list.innerHTML = "";
-    if (usersList.length !== 0) {
-      usersList.forEach((entry, index) => {
-        list.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
-            <ul class="list-group transactionList">
-              <li class="list-group-item">Name: ${entry.name}</li>
-              <li class="list-group-item">AccountNumber: 0${entry.accountNumber}</li>
-            </ul>
-          </div>
-          `;
+    accountHolderInfo.accountNumber &&
+      setTransferFormData((prev) => {
+        return {
+          ...prev,
+          benAcctNum: "0" + accountHolderInfo.accountNumber,
+          benFullName: accountHolderInfo.fullName,
+        };
       });
-      list.style.display = "block";
-    } else {
-      list.style.display = "none";
-    }
-  }, [usersList]);
+  }, [accountHolderInfo]);
+
+  // useEffect(() => {
+  //   const list = document.getElementById("usersList");
+  //   list.innerHTML = "";
+  //   if (usersList.length !== 0) {
+  //     usersList.forEach((entry, index) => {
+  //       list.innerHTML += `<div key=${index} class="card transactionContainer mb-3" style="width: 18rem">
+  //           <ul class="list-group transactionList">
+  //             <li class="list-group-item">Name: ${entry.name}</li>
+  //             <li class="list-group-item">AccountNumber: 0${entry.accountNumber}</li>
+  //           </ul>
+  //         </div>`;
+  //     });
+  //     list.style.display = "block";
+  //   } else {
+  //     list.style.display = "none";
+  //   }
+  // }, [usersList]);
+
+  // if (transferFormData.benAcctNum.length === 11) {
+
+  // }
 
   const handleInputChange = (e) => {
-    const value = e.target.value;
+    let value = e.target.value;
     const name = e.target.name;
+    if (name === "benAcctNum" || name === "amount") {
+      if (value !== "") {
+        if (!/^[0-9]+$/.test(value)) {
+          return;
+        }
+        if (value.length >= 11) {
+          value = value.slice(0, 11);
+        }
+      }
+    }
+    if (transferFormData.benAcctNum.length === 10) {
+      getUserProfile({
+        benAcctNum: value,
+      });
+    }
     setTransferFormData((prevState) => {
       return { ...prevState, [name]: value };
     });
@@ -75,6 +94,12 @@ export default function SendMoney({
       });
       return false;
     }
+    if (transferFormData.benAcctNum.length < 11) {
+      toast.error("Account number must be 11 digits", {
+        autoClose: false,
+      });
+      return false;
+    }
     const dataToSend = {
       senderId: senderInfo._id,
       receipient: { ...transferFormData },
@@ -85,80 +110,94 @@ export default function SendMoney({
       setGoToDashboard(true);
     }
   };
-
-  const viewList = () => {
-    // setButtonContent(!buttonContent);
-    viewUsersList();
-  };
+  // const viewList = () => {
+  //   // setButtonContent(!buttonContent);
+  //   viewUsersList();
+  // };
 
   return (
     <div className="col-xs-12" id="sendMoney">
       {goToDashboard && <Redirect to="/accoutDashBoard" />}
       <Header handleLogOut={logout} />
-      <h2>Transfer Funds</h2>
-      <form>
-        <div className="form-group">
-          <input
-            type="number"
-            name="benAcctNum"
-            className="form-control"
-            placeholder="Destination Account Number"
-            value={transferFormData.benAcctNum}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="benFullName"
-            className="form-control"
-            placeholder="Receipient Account Name"
-            value={transferFormData.benFullName}
-            readOnly
-          />
-          <input
-            type="number"
-            name="amount"
-            className="form-control"
-            placeholder="Amount to transfer"
-            value={transferFormData.amount}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="narration"
-            className="form-control"
-            placeholder="Narration"
-            value={transferFormData.narration}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="action-items">
-          <Button
+      <div id="transferForm">
+        <h4>Send Money</h4>
+        <form id="form">
+          <div className="form-group">
+            <label className="label" htmlFor="destinationAccNum">
+              Receipient Account Number
+            </label>
+            <input
+              type="text"
+              name="benAcctNum"
+              className="form-control"
+              id="destinationAccNum"
+              placeholder="11 digits number"
+              value={transferFormData.benAcctNum}
+              onChange={handleInputChange}
+              required
+            />
+            <label className="label" htmlFor="destinationAccName">
+              Account Holder Name
+            </label>
+            <input
+              type="text"
+              name="benFullName"
+              className="form-control"
+              id="destinationAccName"
+              placeholder="Name"
+              value={transferFormData.benFullName}
+              readOnly
+            />
+            <label className="label" htmlFor="transferAmount">
+              Transfer Amount
+            </label>
+            <input
+              type="text"
+              name="amount"
+              className="form-control"
+              id="transferAmount"
+              placeholder="Amount"
+              value={transferFormData.amount}
+              onChange={handleInputChange}
+              required
+            />
+            <label className="label" htmlFor="transferNarration">
+              Description
+            </label>
+            <input
+              type="text"
+              name="narration"
+              className="form-control"
+              id="transferNarration"
+              placeholder="Narration"
+              value={transferFormData.narration}
+              onChange={handleInputChange}
+            />
+          </div>
+          <Buttons
+            className="mui-but"
             name="credit"
-            variant="contained"
-            className={classes.button}
+            value1="Transfer"
             type="submit"
-            onClick={TransferMoney}
-            size="large"
-          >
-            Transfer
-          </Button>
-        </div>
-      </form>
-      <br />
-      <Button
-        name="credit"
-        variant="contained"
-        className={classes.button}
-        onClick={viewList}
-        size="large"
-      >
-        {!buttonContent ? "View All Users" : "Close"}
-      </Button>
+            id="mui_butt1"
+            fetchAction={TransferMoney}
+          />
+        </form>
+        <br />
+        {/* <Buttons
+          styles="mui-but"
+          name="credit"
+          value1="List all registered users"
+          value2="Close"
+          type="submit"
+          id="mui_butt2"
+          buttonContent={buttonContent}
+          fetchAction={viewList}
+        /> */}
+      </div>
 
       <br />
-      <div id="usersList" style={{ display: "none" }}></div>
+      {/* <div id="usersList" style={{ display: "none" }}></div> */}
     </div>
   );
 }

@@ -14,6 +14,46 @@ export function removeClientList() {
   return { type: actionTypes.REMOVE_CLIENT_LIST };
 }
 
+export function getClientAccountName(data) {
+  return { type: actionTypes.GET_CLIENT_FOR_TRANSACTION, payload: data };
+}
+
+export const getUserProfile = (acctNum) => (dispatch) => {
+  return fetch("/acctNumInquiry", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(acctNum),
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response;
+      } else {
+        let error = new Error();
+        error.message = {
+          text: response.statusText,
+          status: response.status,
+        };
+        throw error;
+      }
+    })
+    .then((response) => response.json())
+    .then((res) => {
+      dispatch(
+        getClientAccountName({
+          fullName: res.fullName,
+          accountNumber: res.accountNumber,
+        })
+      );
+      return { success: true };
+    })
+    .catch((error) => {
+      throw error;
+    });
+};
+
 export const postLogin = (formData) => (dispatch) => {
   return fetch("/login", {
     method: "POST",
@@ -71,6 +111,7 @@ export const postTransferMoney = (transferdata) => (dispatch) => {
     .then((data) => {
       dispatch(updateClientData(data));
       dispatch(removeClientList());
+      dispatch(getClientAccountName({ fullName: null, accountNumber: null }));
       return true;
     })
     .catch((error) => {
@@ -140,7 +181,7 @@ export const initiateGetProfile = () => {
   return async (dispatch) => {
     try {
       const response = await fetch("/getProfile", {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -160,7 +201,7 @@ export const viewRegisteredUsers = () => {
   return async (dispatch) => {
     try {
       const response = await fetch("/viewRegisteredUsers", {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",

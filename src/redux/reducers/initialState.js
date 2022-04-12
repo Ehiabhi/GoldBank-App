@@ -9,3 +9,5 @@ export const initialClientState = {
 };
 
 export const initialClientList = [];
+
+export const initialClientAccountInfo = { fullName: null, accountNumber: null };
